@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    {% for capteur in base %}
+        <p>Le capteur n°{{capteur.id}} s'appelle {{capteur.nom}}. Il se situe {{capteur.emplacement}} dans la pièce {{capteur.piece}}</p>
+        <a href="/update/{{capteur.id}}/">Modifier</a>
+    {% endfor %}
+</body>
+</html>
