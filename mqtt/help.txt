@@ -1,0 +1,3 @@
+net start mysql80
+net stop mysql80
+
