@@ -13,9 +13,10 @@ class capteurForm(ModelForm):
 class donneesForm(ModelForm):
     class Meta:
         model = models.donnees
-        fields = ('valeur', 'capteur', 'timestamp')
+        fields = ('valeur', 'capteur', 'date', 'heure')
         labels = {
             'valeur' : _('valeur'),
             'capteur' : _('capteur'),
-            'timestamp' : _('timestamp'),
+            'date' : _('date'),
+            'heure': _('heure'),
     }

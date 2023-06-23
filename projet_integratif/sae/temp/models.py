@@ -11,7 +11,8 @@ class capteur (models.Model):
 class donnees(models.Model):
     valeur = models.IntegerField(null = False, blank= False)
     capteur = models.ForeignKey("capteur", on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(null = False, blank= False)
+    date = models.DateTimeField(null = False, blank= False)
+    heure = models.DateTimeField(null = False, blank= False)
 
     def __str__(self):
-        return f"Donnée du capteur {self.capteur.nom} ({self.timestamp})"
+        return f"Donnée du capteur {self.capteur.nom} ({self.date} à {self.heure})"

@@ -10,4 +10,7 @@ urlpatterns = [
     path('update/<int:id>/', viewscapteur.update),
     path('traitement-update/<int:id>/', viewscapteur.traitement),
 
+
+path('test/',viewsdonnees.filtrer_capteurs),
+path('filtre/',viewsdonnees.go),
 ]
