@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Données en temps réel</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Fonction pour rafraîchir les données toutes les 5 secondes
+            setInterval(refreshData, 5000);
+
+            function refreshData() {
+                // Requête AJAX pour récupérer les nouvelles données depuis le serveur
+                $.ajax({
+                    url: '/actualiser-donnees/',  // L'URL de la vue Django qui renvoie les données actualisées
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        // Mettre à jour la table avec les nouvelles données reçues
+                        var tbody = $('#table-donnees tbody');
+                        tbody.empty();  // Supprimer les anciennes données de la table
+
+                        // Parcourir les nouvelles données et les ajouter à la table
+                        for (var i = 0; i < response.donnees.length; i++) {
+                            var donnee = response.donnees[i];
+                            var row = '<tr>' +
+                                '<td>' + donnee.date + '</td>' +
+                                '<td>' + donnee.heure + '</td>' +
+                                '<td>' + donnee.temperature + '</td>' +
+                                '</tr>';
+                            tbody.append(row);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Erreur lors de la récupération des données en temps réel:', error);
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+    <h1>Données en temps réel</h1>
+    <table id="table-donnees">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Heure</th>
+                <th>Température</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Les données seront ajoutées ici par JavaScript -->
+        </tbody>
+    </table>
+    <br>
+    <br>
+    <h1>capteurs</h1>
+{% for capteur in capteurs %}
+    <div>
+        <span>{{ capteur.nom }}</span>
+        <a href="capteurs/update/{{capteur.nom}}/">Modifier</a>
+    </div>
+{% endfor %}
+
+
+<br>
+    <br>
+<a href="/filtrer-donnees/">Accéder au filtrage des données</a>
+    <br>
+    <br>
+<a href="/exporter-donnees/">Exporter les données au format CSV</a>
+    <br>
+    <br>
+<a href="/graph/">Graphique de donne</a>
+ <br>
+    <br>
+
+
+
+
+
+</body>
+</html>
