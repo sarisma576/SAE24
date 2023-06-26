@@ -16,7 +16,8 @@ def actualiser_donnees(request):
         serialized_data.append({
             'date': donnee.date.strftime('%Y-%m-%d'),
             'heure': donnee.heure.strftime('%H:%M:%S'),
-            'temperature': donnee.temperature
+            'temperature': donnee.temperature,
+            'capteur':donnee.capteur.nom,
         })
 
     return JsonResponse({'donnees': serialized_data})
@@ -32,20 +33,31 @@ def filtrer_donnees(request):
     donnees = Donnee.objects.all()
 
     # Filtrer par nom de capteur
-    if nom_capteur:
-        donnees = donnees.filter(capteur__nom=nom_capteur)
+
 
     # Filtrer par date de début et de fin
-    if date_debut and date_fin:
+    if date_debut and date_fin and nom_capteur:
         date_debut = datetime.strptime(date_debut, '%d/%m/%Y')
         date_fin = datetime.strptime(date_fin, '%d/%m/%Y')
         donnees = donnees.filter(capteur__nom=nom_capteur, date__range=[date_debut, date_fin])
-    elif date_debut:
+    elif date_debut and date_fin:
+        date_debut = datetime.strptime(date_debut, '%d/%m/%Y')
+        date_fin = datetime.strptime(date_fin, '%d/%m/%Y')
+        donnees = donnees.filter(date__range=[date_debut, date_fin])
+    elif nom_capteur and date_debut:
         date_debut = datetime.strptime(date_debut, '%d/%m/%Y')
         donnees = donnees.filter(capteur__nom=nom_capteur, date__gte=date_debut)
-    elif date_fin:
+    elif nom_capteur and date_fin:
         date_fin = datetime.strptime(date_fin, '%d/%m/%Y')
         donnees = donnees.filter(capteur__nom=nom_capteur, date__lte=date_fin)
+    elif nom_capteur:
+        donnees = donnees.filter(capteur__nom=nom_capteur)
+    elif date_debut:
+        date_debut = datetime.strptime(date_debut, '%d/%m/%Y')
+        donnees = donnees.filter(date__gte=date_debut)
+    elif date_fin:
+        date_fin = datetime.strptime(date_fin, '%d/%m/%Y')
+        donnees = donnees.filter(date__lte=date_fin)
 
     donnees = donnees.order_by('-date', '-heure')
     context = {
@@ -100,26 +112,36 @@ import plotly.graph_objects as go
 from django.shortcuts import render
 import plotly.graph_objects as go
 
+import plotly.graph_objs as go
+from django.shortcuts import render
+from .models import Donnee
+
 def graph_view(request):
-    # Récupérer les 10 dernières données de température depuis le modèle Donnee
-    donnees = Donnee.objects.order_by('-date', '-heure')[:50]
+    donnees = Donnee.objects.filter(capteur__nom='A72E3F6B79BB').order_by('-date', '-heure')[:50]
+    donnees2 = Donnee.objects.filter(capteur__nom='B8A5F3569EFF').order_by('-date', '-heure')[:50]
 
-    # Traiter les données et les préparer pour le graphique
-    x_values = [donnees[i].heure for i in range(len(donnees))]
-    y_values = [donnees[i].temperature for i in range(len(donnees))]
+    x_values = [donnee.heure for donnee in donnees]
+    y_values = [donnee.temperature for donnee in donnees]
 
-    # Créer la figure du graphique Plotly
     fig = go.Figure(data=go.Scatter(x=x_values, y=y_values, mode='lines', name='Temperature'))
-    fig.update_layout(title='Graphique des 50 dernières données de température', xaxis_title='Heure', yaxis_title='Température')
+    fig.update_layout(title='Graphique des 50 dernières données de température (Capteur A72E3F6B79BB)', xaxis_title='Heure', yaxis_title='Température')
 
-    # Convertir la figure en div HTML
-    graph_div = fig.to_html(full_html=False, default_height=700, default_width=1000)
+    x_values2 = [donnee.heure for donnee in donnees2]
+    y_values2 = [donnee.temperature for donnee in donnees2]
 
-    # Passer le div du graphique au template
-    context = {'graph_div': graph_div}
+    fig2 = go.Figure(data=go.Scatter(x=x_values2, y=y_values2, mode='lines', name='Temperature'))
+    fig2.update_layout(title='Graphique des 50 dernières données de température (Capteur B8A5F3569EFF)', xaxis_title='Heure', yaxis_title='Température')
 
-    # Rendre le template contenant le graphique
+    graph_div1 = fig.to_html(full_html=False, default_height=500, default_width=800)
+    graph_div2 = fig2.to_html(full_html=False, default_height=500, default_width=800)
+
+    context = {
+        'graph_div1': graph_div1,
+        'graph_div2': graph_div2
+    }
+
     return render(request, 'mqtt/graph.html', context)
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Capteur

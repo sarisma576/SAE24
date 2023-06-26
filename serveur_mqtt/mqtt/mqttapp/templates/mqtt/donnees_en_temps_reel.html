@@ -4,39 +4,41 @@
     <title>Données en temps réel</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function() {
-            // Fonction pour rafraîchir les données toutes les 5 secondes
-            setInterval(refreshData, 5000);
+    $(document).ready(function() {
+        // Fonction pour rafraîchir les données toutes les 5 secondes
+        setInterval(refreshData, 5000);
 
-            function refreshData() {
-                // Requête AJAX pour récupérer les nouvelles données depuis le serveur
-                $.ajax({
-                    url: '/actualiser-donnees/',  // L'URL de la vue Django qui renvoie les données actualisées
-                    method: 'GET',
-                    dataType: 'json',
-                    success: function(response) {
-                        // Mettre à jour la table avec les nouvelles données reçues
-                        var tbody = $('#table-donnees tbody');
-                        tbody.empty();  // Supprimer les anciennes données de la table
+        function refreshData() {
+            // Requête AJAX pour récupérer les nouvelles données depuis le serveur
+            $.ajax({
+                url: '/actualiser-donnees/',  // L'URL de la vue Django qui renvoie les données actualisées
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    // Mettre à jour la table avec les nouvelles données reçues
+                    var tbody = $('#table-donnees tbody');
+                    tbody.empty();  // Supprimer les anciennes données de la table
 
-                        // Parcourir les nouvelles données et les ajouter à la table
-                        for (var i = 0; i < response.donnees.length; i++) {
-                            var donnee = response.donnees[i];
-                            var row = '<tr>' +
-                                '<td>' + donnee.date + '</td>' +
-                                '<td>' + donnee.heure + '</td>' +
-                                '<td>' + donnee.temperature + '</td>' +
-                                '</tr>';
-                            tbody.append(row);
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.log('Erreur lors de la récupération des données en temps réel:', error);
+                    // Parcourir les nouvelles données et les ajouter à la table
+                    for (var i = 0; i < response.donnees.length; i++) {
+                        var donnee = response.donnees[i];
+                        var row = '<tr>' +
+                            '<td>' + donnee.date + '</td>' +
+                            '<td>' + donnee.heure + '</td>' +
+                            '<td>' + donnee.temperature + '</td>' +
+                            '<td>' + donnee.capteur + '</td>' +  // Ajouter cette ligne pour afficher le champ 'capteur'
+                            '</tr>';
+                        tbody.append(row);
                     }
-                });
-            }
-        });
-    </script>
+                },
+                error: function(xhr, status, error) {
+                    console.log('Erreur lors de la récupération des données en temps réel:', error);
+                }
+            });
+        }
+    });
+</script>
+
 </head>
 <body>
     <h1>Données en temps réel</h1>
@@ -46,6 +48,7 @@
                 <th>Date</th>
                 <th>Heure</th>
                 <th>Température</th>
+                <th>Capteur</th>
             </tr>
         </thead>
         <tbody>

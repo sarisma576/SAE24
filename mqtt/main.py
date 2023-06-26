@@ -38,7 +38,7 @@ def upload_cache_to_database():
                 capteur_values = (fields['Id'], fields['piece'])
                 cursor.execute(capteur_query, capteur_values)
 
-                donnee_query = "INSERT INTO donnee (capteur, date, heure, temperature) VALUES (%s, %s, %s, %s)"
+                donnee_query = "INSERT INTO donnee (capteur_id, date, heure, temperature) VALUES (%s, %s, %s, %s)"
                 donnee_values = (fields['Id'], formatted_date, fields['time'], fields['temp'])
                 cursor.execute(donnee_query, donnee_values)
 
@@ -56,7 +56,6 @@ def upload_cache_to_database():
     except mysql.connector.Error as e:
         print(f"Erreur lors de l'enregistrement dans la base de données : {e}")
         print("Impossible de réuploader les données du cache")
-
 
 
 # Callback appelée lorsque la connexion au broker est établie
@@ -94,7 +93,7 @@ def on_message(client, userdata, msg):
         capteur_values = (fields['Id'], fields['piece'])
         cursor.execute(capteur_query, capteur_values)
 
-        donnee_query = "INSERT INTO donnee (capteur, date, heure, temperature) VALUES (%s, %s, %s, %s)"
+        donnee_query = "INSERT INTO donnee (capteur_id, date, heure, temperature) VALUES (%s, %s, %s, %s)"
         donnee_values = (fields['Id'], formatted_date, fields['time'], fields['temp'])
         cursor.execute(donnee_query, donnee_values)
 
@@ -114,16 +113,6 @@ def on_message(client, userdata, msg):
             cache.write(data + '\n')
 
 
-# Callback appelée lors de la reconnexion au broker MQTT
-def on_reconnect(client, userdata, flags, rc):
-    if rc == 0:
-        print("Reconnecté au broker MQTT")
-
-    else:
-        print("Erreur de reconnexion au broker MQTT")
-        with open(cache_file, 'a') as cache:
-            cache.writelines(userdata)
-    upload_cache_to_database()
 # Connexion au broker MQTT
 broker = "test.mosquitto.org"  # Adresse du broker MQTT
 port = 1883  # Port par défaut pour MQTT
@@ -134,9 +123,9 @@ client = mqtt.Client()
 # Définition des callbacks
 client.on_connect = on_connect
 client.on_message = on_message
-client.on_reconnect = on_reconnect
 
 # Connexion au broker MQTT
 client.connect(broker, port)
+
 # Boucle principale pour maintenir la connexion et traiter les messages reçus
 client.loop_forever()
